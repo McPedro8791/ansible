@@ -10,7 +10,7 @@
   hosts: local
   gather_facts: false
   vars:
-    step_seconds: 30
+    step_seconds: 10
 
   tasks:
     - name: "Step 1/10: Warming up"
