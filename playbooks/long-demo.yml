@@ -1,0 +1,58 @@
+---
+# name: Long-Running Demo
+# description: Long-running no-op demo (~5 min, makes no system changes)
+#
+# Exercises the UI for in-progress jobs (live log streaming, polling,
+# "running" lock, etc). Every step is just a timed pause.
+# Total runtime = step_seconds * 10 (default 30s * 10 = ~5 minutes).
+# Override for a quick smoke test: ansible-playbook playbooks/long-demo.yml -e step_seconds=1
+- name: Long-running no-op demo
+  hosts: local
+  gather_facts: false
+  vars:
+    step_seconds: 30
+
+  tasks:
+    - name: "Step 1/10: Warming up"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 2/10: Checking prerequisites"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 3/10: Waiting for maintenance window"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 4/10: Simulating pre-flight checks"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 5/10: Simulating staged rollout (phase 1)"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 6/10: Simulating staged rollout (phase 2)"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 7/10: Simulating staged rollout (phase 3)"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 8/10: Simulating verification"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 9/10: Simulating cooldown"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: "Step 10/10: Wrapping up"
+      ansible.builtin.pause:
+        seconds: "{{ step_seconds }}"
+
+    - name: Report completion
+      debug:
+        msg: "Long-running demo complete. No changes were made to the system."

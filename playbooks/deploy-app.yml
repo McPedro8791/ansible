@@ -1,0 +1,37 @@
+---
+# name: Deploy App
+# description: Deploy the latest application release
+#
+# Safe for repeated runs - only touches /tmp/ansible-gui-demo.
+- name: Deploy the latest application release
+  hosts: local
+  gather_facts: false
+  vars:
+    demo_dir: /tmp/ansible-gui-demo/releases
+
+  tasks:
+    - name: Ensure releases directory exists
+      file:
+        path: "{{ demo_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Determine release identifier
+      set_fact:
+        release_id: "release-{{ lookup('pipe', 'date -u +%Y%m%d%H%M%S') }}"
+
+    - name: Write release marker
+      copy:
+        dest: "{{ demo_dir }}/{{ release_id }}.txt"
+        content: "Deployed {{ release_id }}\n"
+
+    - name: Point "current" symlink at the new release
+      file:
+        src: "{{ demo_dir }}/{{ release_id }}.txt"
+        dest: "{{ demo_dir }}/current.txt"
+        state: link
+        force: true
+
+    - name: Report completion
+      debug:
+        msg: "Deployed {{ release_id }}."

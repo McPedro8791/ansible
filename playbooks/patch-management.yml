@@ -1,0 +1,35 @@
+---
+# name: Patch Management
+# description: Apply OS security patches
+#
+# Intentionally does NOT touch real system packages - this is a demo/mockup
+# target, only writes to /tmp/ansible-gui-demo.
+- name: Apply OS security patches
+  hosts: local
+  gather_facts: false
+  vars:
+    demo_dir: /tmp/ansible-gui-demo/patching
+
+  tasks:
+    - name: Ensure demo patching directory exists
+      file:
+        path: "{{ demo_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Simulate checking for available updates
+      command: "true"
+      changed_when: false
+
+    - name: Simulate applying security patches
+      command: "true"
+      changed_when: true
+
+    - name: Record patch run
+      copy:
+        dest: "{{ demo_dir }}/last-patch-run.txt"
+        content: "patch-management.yml simulated run at {{ lookup('pipe', 'date -u +%Y-%m-%dT%H:%M:%SZ') }}\n"
+
+    - name: Report completion
+      debug:
+        msg: "Security patches applied (simulated, demo only)."

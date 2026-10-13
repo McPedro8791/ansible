@@ -1,0 +1,36 @@
+---
+# name: Backup
+# description: Run backup jobs across all hosts
+#
+# Safe for repeated runs - only touches /tmp/ansible-gui-demo.
+- name: Run backup jobs across all hosts
+  hosts: local
+  gather_facts: false
+  vars:
+    demo_dir: /tmp/ansible-gui-demo/backups
+
+  tasks:
+    - name: Ensure backups directory exists
+      file:
+        path: "{{ demo_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Determine backup identifier
+      set_fact:
+        backup_id: "backup-{{ lookup('pipe', 'date -u +%Y%m%d%H%M%S') }}"
+
+    - name: Create backup archive of demo config
+      archive:
+        path: /tmp/ansible-gui-demo/config
+        dest: "{{ demo_dir }}/{{ backup_id }}.tar.gz"
+      ignore_errors: true
+
+    - name: Write backup record
+      copy:
+        dest: "{{ demo_dir }}/last-backup.txt"
+        content: "{{ backup_id }} completed\n"
+
+    - name: Report completion
+      debug:
+        msg: "Backup {{ backup_id }} complete."

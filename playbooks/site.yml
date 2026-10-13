@@ -1,0 +1,40 @@
+---
+# name: Site Provisioning
+# description: Full site provisioning playbook
+#
+# Safe for repeated runs - only touches /tmp/ansible-gui-demo.
+- name: Full site provisioning playbook
+  hosts: local
+  gather_facts: true
+  vars:
+    demo_dir: /tmp/ansible-gui-demo
+
+  tasks:
+    - name: Report target host
+      debug:
+        msg: "Provisioning {{ inventory_hostname }} ({{ ansible_distribution | default('unknown distro') }})"
+
+    - name: Ensure demo working directory exists
+      file:
+        path: "{{ demo_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure demo subdirectories exist
+      file:
+        path: "{{ demo_dir }}/{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - releases
+        - backups
+        - config
+
+    - name: Write a site marker file
+      copy:
+        dest: "{{ demo_dir }}/site-provisioned.txt"
+        content: "site.yml last ran at {{ ansible_date_time.iso8601 }}\n"
+
+    - name: Report completion
+      debug:
+        msg: "Site provisioning complete."

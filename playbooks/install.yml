@@ -1,0 +1,55 @@
+---
+# name: Kubernetes Upgrade
+# description: Upgrade the Kubernetes version
+#
+# Available versions are served by GET /api/v1/cluster/ansible/playbooks/install/versions
+# (backed by ansible/versions.json), not declared here.
+#
+# Demo only - does NOT touch a real cluster. Simulates the usual upgrade
+# steps (drain, upgrade control plane, upgrade nodes, uncordon) and records
+# which stack was "applied" under /tmp/ansible-gui-demo/k8s-upgrade/.
+# Requires stack to be passed in, e.g.:
+#   ansible-playbook playbooks/install.yml -e stack=1.30.0
+- name: Upgrade the Kubernetes version
+  hosts: local
+  gather_facts: false
+  vars:
+    demo_dir: /tmp/ansible-gui-demo/k8s-upgrade
+    stack: ""
+
+  tasks:
+    - name: Fail if no target stack was supplied
+      fail:
+        msg: "stack must be set, e.g. -e stack=1.30.0"
+      when: stack == ""
+
+    - name: Ensure demo directory exists
+      file:
+        path: "{{ demo_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: "Simulate draining nodes"
+      command: "true"
+      changed_when: true
+
+    - name: "Simulate upgrading control plane to {{ stack }}"
+      command: "true"
+      changed_when: true
+
+    - name: "Simulate upgrading worker nodes to {{ stack }}"
+      command: "true"
+      changed_when: true
+
+    - name: "Simulate uncordoning nodes"
+      command: "true"
+      changed_when: true
+
+    - name: Record the applied stack version
+      copy:
+        dest: "{{ demo_dir }}/current-version.txt"
+        content: "{{ stack }}\n"
+
+    - name: Report completion
+      debug:
+        msg: "Kubernetes upgraded to stack {{ stack }} (simulated, no real cluster changes)."

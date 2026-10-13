@@ -1,0 +1,24 @@
+[
+  {
+    "id": "ssh-target",
+    "label": "agw92-0051.10.elga-core.at",
+    "description": "Disposable sshd container from ssh-target/, reachable via Docker network.",
+    "host": "ssh-target",
+    "user": "ansible",
+    "port": 22,
+    "key_path": "/run/secrets/ssh_private_key",
+    "remote_dir": "/opt/ansible",
+    "exec_mode": "tmux"
+  },
+  {
+    "id": "ssh-target-systemd",
+    "label": "ssh-target (systemd exec mode)",
+    "description": "Same disposable container as ssh-target, but runs via systemd --user instead of tmux.",
+    "host": "ssh-target",
+    "user": "ansible",
+    "port": 22,
+    "key_path": "/run/secrets/ssh_private_key",
+    "remote_dir": "/opt/ansible",
+    "exec_mode": "systemd"
+  }
+]
