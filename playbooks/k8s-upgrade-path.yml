@@ -1,0 +1,39 @@
+---
+# name: Kubernetes Upgrade Path
+# description: Upgrades through every minor version up to the target; from each minor the newest versions/<version>.yml is installed with its roles
+# param: current | label=Installed version | type=k8sversion | help=Read from the selected cluster
+# param: target | label=Target minor version | pattern=^([0-9]+\.[0-9]+)?$ | help=Empty = the newest minor version in the versions/ directory of this checkout (e.g. 1.38)
+#
+# How it works (details: examples/ansible-k8s-upgrade/README.md):
+#  - versions/<version>.yml (1.36.2.yml, 1.37.5.yml, or just 1.37.yml) describe
+#    one release each: they define k8s_version and the list k8s_roles to install.
+#  - The lookup plugin k8s_upgrade_path (playbooks/lookup_plugins/) turns the
+#    installed version and the target into the steps: one per minor version,
+#    always the newest file of that minor, none skipped.
+#  - The target is normally not typed in: it comes from the checked-out repo,
+#    i.e. the newest minor version found in versions/.
+#  - hosts: localhost is for trying it out; for a real cluster use your
+#    inventory group here (the roles then run on those hosts).
+- name: Upgrade Kubernetes step by step
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Work out the upgrade steps from the version files of this checkout
+      ansible.builtin.set_fact:
+        upgrade_steps: "{{ lookup('k8s_upgrade_path', current=current, target=(target | default('', true)), wantlist=True) }}"
+
+    - name: Show the plan
+      ansible.builtin.debug:
+        msg: >-
+          {{ 'Installed ' ~ current ~ ' -> ' ~ (upgrade_steps | map(attribute='version') | join(' -> '))
+             if upgrade_steps | length > 0
+             else 'Nothing to do: ' ~ current ~ ' is up to date for the versions of this checkout' }}
+
+    - name: Install the versions, one step per minor version
+      ansible.builtin.include_role:
+        name: k8s_upgrade_step
+      loop: "{{ upgrade_steps }}"
+      loop_control:
+        loop_var: step
+        label: "{{ step.version }}"

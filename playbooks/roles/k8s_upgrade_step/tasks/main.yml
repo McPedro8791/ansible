@@ -1,0 +1,35 @@
+---
+# One upgrade step: load versions/<version>.yml of this step into step_vars (a
+# dict, so nothing of the previous step can linger), show k8s_version, then
+# install the roles the file lists - each with k8s_version set.
+- name: Load the version file of this step
+  ansible.builtin.include_vars:
+    file: "{{ step.file }}"
+    name: step_vars
+
+- name: Check the version file
+  ansible.builtin.assert:
+    that:
+      - step_vars.k8s_version is defined
+      - step_vars.k8s_version | string is regex('^' ~ (step.minor | regex_escape) ~ '(\.|$)')
+      - step_vars.k8s_roles is defined
+      - step_vars.k8s_roles | length > 0
+    fail_msg: "{{ step.name }} must define k8s_version (of minor version {{ step.minor }}) and a non-empty list k8s_roles"
+    quiet: true
+
+- name: Control - k8s_version loaded from {{ step.name }}
+  ansible.builtin.debug:
+    var: step_vars.k8s_version
+
+- name: Control - roles of {{ step.version }}
+  ansible.builtin.debug:
+    var: step_vars.k8s_roles
+
+- name: Install the roles of {{ step.version }}
+  ansible.builtin.include_role:
+    name: "{{ role_name }}"
+  vars:
+    k8s_version: "{{ step_vars.k8s_version }}"
+  loop: "{{ step_vars.k8s_roles }}"
+  loop_control:
+    loop_var: role_name

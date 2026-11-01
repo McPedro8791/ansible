@@ -1,0 +1,5 @@
+---
+# Demo role: only says what a real role would do.
+- name: Upgrade the control plane to {{ k8s_version }}
+  ansible.builtin.debug:
+    msg: "[k8s_control_plane] would install Kubernetes {{ k8s_version }} on the control plane"

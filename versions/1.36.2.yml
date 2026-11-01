@@ -1,0 +1,6 @@
+---
+# Release description: loaded by the k8s_upgrade_step role.
+k8s_version: "1.36.2"
+k8s_roles:
+  - k8s_control_plane
+  - k8s_workers
