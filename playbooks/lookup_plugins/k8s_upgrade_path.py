@@ -29,8 +29,10 @@ options:
     type: str
     default: ''
   dir:
-    description: The directory with the version files. By default C(<playbook_dir>/../versions),
-      C(<playbook_dir>/versions) and C(./versions) are tried in this order.
+    description: The directory with the version files. A relative path is taken from the working
+      directory (the repository root, where ansible-playbook is started) and then from the parent
+      of the playbook directory. By default C(<playbook_dir>/../versions), C(<playbook_dir>/versions)
+      and C(./versions) are tried in this order.
     type: str
     default: ''
 return:
@@ -52,10 +54,16 @@ VERSION_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?")
 
 
 def _find_dir(explicit, variables):
-    if explicit:
+    playbook_dir = (variables or {}).get("playbook_dir") or os.getcwd()
+    if explicit and os.path.isabs(explicit):
         candidates = [explicit]
+    elif explicit:
+        candidates = [
+            os.path.join(os.getcwd(), explicit),
+            os.path.join(playbook_dir, "..", explicit),
+            os.path.join(playbook_dir, explicit),
+        ]
     else:
-        playbook_dir = (variables or {}).get("playbook_dir") or os.getcwd()
         candidates = [
             os.path.join(playbook_dir, "..", "versions"),
             os.path.join(playbook_dir, "versions"),

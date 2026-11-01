@@ -2,7 +2,7 @@
 # name: Kubernetes Upgrade Path
 # description: Upgrades through every minor version up to the target; from each minor the newest versions/<version>.yml is installed with its roles
 # param: current | label=Installed version | type=k8sversion | help=Read from the selected cluster
-# param: target | label=Target minor version | pattern=^([0-9]+\.[0-9]+)?$ | help=Empty = the newest minor version in the versions/ directory of this checkout (e.g. 1.38)
+# param: target | label=Target minor version | type=repolist | dir=versions | pattern=^[0-9]+\.[0-9]+ | group=minor | empty=(newest in the repo) | help=The minor versions available in the repo; empty = the newest
 #
 # How it works (details: examples/ansible-k8s-upgrade/README.md):
 #  - versions/<version>.yml (1.36.2.yml, 1.37.5.yml, or just 1.37.yml) describe
@@ -11,17 +11,24 @@
 #    installed version and the target into the steps: one per minor version,
 #    always the newest file of that minor, none skipped.
 #  - The target is normally not typed in: it comes from the checked-out repo,
-#    i.e. the newest minor version found in versions/.
+#    i.e. the newest minor version found in versions/. The drop-down of the
+#    "target" parameter lists the minor versions the checkout offers
+#    (type=repolist, filled from the directory in dir=).
+#  - The versions directory is configurable: change dir= in the "target"
+#    line above AND k8s_versions_dir below (both name the same directory,
+#    relative to the repository root), or pass -e k8s_versions_dir=<dir>.
 #  - hosts: localhost is for trying it out; for a real cluster use your
 #    inventory group here (the roles then run on those hosts).
 - name: Upgrade Kubernetes step by step
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    k8s_versions_dir: versions   # keep equal to dir= of the "target" parameter
   tasks:
     - name: Work out the upgrade steps from the version files of this checkout
       ansible.builtin.set_fact:
-        upgrade_steps: "{{ lookup('k8s_upgrade_path', current=current, target=(target | default('', true)), wantlist=True) }}"
+        upgrade_steps: "{{ lookup('k8s_upgrade_path', current=current, target=(target | default('', true)), dir=k8s_versions_dir, wantlist=True) }}"
 
     - name: Show the plan
       ansible.builtin.debug:
