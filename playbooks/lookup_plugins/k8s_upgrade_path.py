@@ -15,8 +15,8 @@ description:
     installed version to the target, one step per minor version.
   - From every minor version the newest file is used (several may exist for one minor; a file without
     patch number, C(1.37.yml), counts as the oldest of its minor).
-  - The installed minor version is only a step when a newer patch release of it exists than the one
-    installed. Every minor between the installed and the target one is a step and must have a file
+  - The installed minor version is a step when a newer patch release of it exists than the one
+    installed, or when it is the target itself (the same version again, to roll out changed data). Every minor between the installed and the target one is a step and must have a file
     (minor versions are never skipped); a missing one is an error.
 options:
   current:
@@ -117,9 +117,16 @@ def build_path(directory, current, target):
         raise AnsibleError("k8s_upgrade_path: the target %d.%d is older than the installed %d.%d - downgrades are not supported" % (tgt_key + cur_key))
 
     keys = []
-    # the installed minor: only when a newer patch release exists
-    if cur_key in best and cur_patch is not None and best[cur_key][0] > cur_patch:
-        keys.append(cur_key)
+    # the installed minor: when a newer patch release exists, or when it is the
+    # target itself (the same version again, e.g. to roll out changed data)
+    if cur_key in best:
+        newer_patch = cur_patch is not None and best[cur_key][0] > cur_patch
+        if tgt_key == cur_key:
+            if cur_patch is not None and best[cur_key][0] < cur_patch:
+                raise AnsibleError("k8s_upgrade_path: the installed %s is newer than the newest file of its minor version (%s)" % (current, best[cur_key][1]))
+            keys.append(cur_key)
+        elif newer_patch:
+            keys.append(cur_key)
     # every minor in between and the target: none may be missing
     missing = [k for k in ((cur_key[0], m) for m in range(cur_key[1] + 1, tgt_key[1] + 1)) if k not in best]
     if missing:

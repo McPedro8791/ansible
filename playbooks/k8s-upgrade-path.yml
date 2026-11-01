@@ -2,7 +2,7 @@
 # name: Kubernetes Upgrade Path
 # description: Upgrades through every minor version up to the target; from each minor the newest versions/<version>.yml is installed with its roles
 # param: current | label=Installed version | type=k8sversion | help=Read from the selected cluster
-# param: target | label=Target minor version | type=repolist | dir=versions | pattern=^[0-9]+\.[0-9]+ | group=minor | newer_than=current | empty=(newest in the repo) | help=The minor versions available in the repo; empty = the newest
+# param: target | label=Target minor version | type=repolist | dir=versions | pattern=^[0-9]+\.[0-9]+ | group=minor | min_version=current | empty=(newest in the repo) | help=The minor versions available in the repo; empty = the newest
 #
 # How it works (details: examples/ansible-k8s-upgrade/README.md):
 #  - versions/<version>.yml (1.36.2.yml, 1.37.5.yml, or just 1.37.yml) describe
