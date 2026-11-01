@@ -1,0 +1,25 @@
+---
+# name: Const Demo
+# description: Fixed values read from a ConfigMap and a Secret when the run starts; changes nothing
+# param: greeting | label=Greeting | type=const | from=configmap:ansible-gui/demo-config/message | help=Fixed by the platform team
+# param: db_password | label=DB password | type=const | from=secret:ansible-gui/demo-credentials/password
+# param: repeat | label=Repeat | type=number | default=1 | min=1 | max=5
+#
+# Example for `type=const` parameters (see docs/API.md, "Parameters"): the
+# values are not entered in the GUI - the backend reads them from the named
+# ConfigMap / Secret when the run starts. It needs the objects and a Role
+# that lets the backend read them: deploy/kubernetes/const-sources.example.yaml.
+# Secret values are never shown in the GUI or stored with the run, but a task
+# that prints one writes it to the output - use no_log on such tasks.
+- name: Use values from the cluster
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Show the ConfigMap value
+      ansible.builtin.debug:
+        msg: "{{ greeting }} (x{{ repeat }})"
+
+    - name: Use the Secret without printing it
+      ansible.builtin.debug:
+        msg: "the password has {{ db_password | length }} characters"
