@@ -1,0 +1,52 @@
+---
+# name: Parameter Demo
+# description: Shows every parameter type of the playbook form; changes nothing on the target
+# param: stage | label=Stage | type=select | options=dev,staging,prod | default=dev | required | help=Which stage the job is meant for
+# param: retention_days | label=Retention (days) | type=number | default=7 | min=1 | max=365 | help=How long results are kept
+# param: ticket | label=Ticket | pattern=^[A-Z]+-[0-9]+$ | help=Change ticket, e.g. OPS-123 (optional)
+# param: note | label=Note | help=Free text, shown in the output
+# param: dry_run | label=Dry run | type=boolean | default=true | help=Only print what would be done
+#
+# Example for the "# param:" lines (see docs/API.md, "Parameters"): copy this
+# file into the playbooks directory of the Ansible content repo and open it
+# on the Maintenance page - the form below the playbook selection is built
+# from the header lines above. Numbers arrive as numbers and booleans as
+# true/false, so they can be used directly in conditions. Do not name a
+# parameter like an Ansible keyword or magic variable (environment, name,
+# hosts, vars, groups, ...) - the backend rejects such names.
+- name: Show the parameters
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    # Optional parameters that were left empty are not passed at all, so give
+    # them a fallback here.
+    ticket_label: "{{ ticket | default('(none)') }}"
+    note_label: "{{ note | default('(none)') }}"
+  tasks:
+    - name: Print what the form sent
+      ansible.builtin.debug:
+        msg:
+          - "stage          = {{ stage }}"
+          - "retention_days = {{ retention_days }} ({{ retention_days | type_debug }})"
+          - "ticket         = {{ ticket_label }}"
+          - "note           = {{ note_label }}"
+          - "dry_run        = {{ dry_run }} ({{ dry_run | type_debug }})"
+
+    - name: Refuse to run for prod without a ticket
+      ansible.builtin.fail:
+        msg: "Changes in prod need a ticket (parameter 'ticket')."
+      when:
+        - stage == 'prod'
+        - not dry_run
+        - ticket is not defined
+
+    - name: Only a dry run - say what would happen
+      ansible.builtin.debug:
+        msg: "Would clean up results older than {{ retention_days }} days in {{ stage }}."
+      when: dry_run
+
+    - name: Do the (simulated) work
+      ansible.builtin.debug:
+        msg: "Cleaning up results older than {{ retention_days }} days in {{ stage }} - nothing is changed by this demo."
+      when: not dry_run
