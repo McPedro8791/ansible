@@ -1,0 +1,19 @@
+# name: OpenBao Demo
+# description: A value read from OpenBao by the backend; the password is never shown or stored
+# param: db_password | label=DB password | type=const | from=openbao:secret/demo/db#password
+# param: repeat | label=Repeat | type=number | default=1 | min=1 | max=5
+#
+# Example for a `type=const` parameter that comes from OpenBao (see docs/API.md,
+# "Parameters"): the BACKEND reads secret/demo/db (KV) with its own credentials
+# (OPENBAO_ADDR and a token or Kubernetes role) when the run starts. For the
+# test OpenBao of deploy/openbao/openbao-dev.yaml:
+#   kubectl -n openbao exec deploy/openbao -- sh -c \
+#     'BAO_TOKEN=root bao kv put -mount=secret demo/db password=s3cr3t'
+- name: Use the value from OpenBao
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Use the password without printing it
+      ansible.builtin.debug:
+        msg: "the password has {{ db_password | length }} characters (x{{ repeat }})"

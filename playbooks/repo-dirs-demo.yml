@@ -1,0 +1,15 @@
+# name: Repo Directories Demo
+# description: Choose one of the subdirectories of customers/ in the repository
+# param: customer | label=Customer | type=repolist | dir=customers | entries=dirs | required | help=One entry per subdirectory of customers/
+#
+# Example for a `type=repolist` parameter with `entries=dirs` (see docs/API.md,
+# "Parameters"): the choices are the subdirectories of `dir` in the checked-out
+# content repository, so a new customer directory shows up without touching this
+# file. Create e.g. customers/acme/ and customers/globex/ in the repository.
+- name: Show the chosen customer
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - ansible.builtin.debug:
+        msg: "customer={{ customer }}"
