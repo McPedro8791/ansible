@@ -28,5 +28,6 @@ All of them run against `localhost` of the target and change at most files under
 | `precheck-demo.yml` | `# precheck:`: checks on the target before the run |
 | `chain-backup-demo.yml`, `chain-upgrade-demo.yml` | `# requires:`: the backup runs first, then the upgrade |
 | `secret-demo.yml` | `type=secret`: a typed-in password, never stored |
+| `ticket-demo.yml` | `# ticket: required` and `# ticket-pattern:`: a real run needs a ticket of the form ABC-123 |
 | `full-header-demo.yml` | every header line at once |
 | `parameter-demo.yml`, `const-demo.yml`, `k8s-version-demo.yml`, `repo-dirs-demo.yml`, `openbao-demo.yml` | parameters of all types, constants, the Kubernetes version, lists from the repository, values from OpenBao |

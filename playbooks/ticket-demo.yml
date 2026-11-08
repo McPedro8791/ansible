@@ -1,0 +1,19 @@
+---
+# name: Ticket demo
+# description: A real run needs a ticket of the form ABC-123; a dry run needs none
+# ticket: required
+# ticket-pattern: ^[A-Z]+-[0-9]+$
+# param: note | label=Note | help=Free text, shown in the output
+#
+# "# ticket: required" makes the Ticket field mandatory for a REAL run (a dry run never needs one); "# ticket: optional" switches a
+# requirement of the backend (TICKET_REQUIRED=true) off for this playbook. "# ticket-pattern:" is the format a ticket must have, a
+# regular expression applied to the ticket in CAPITALS (the field writes it in capitals): here letters, a hyphen, digits - CHG-1234.
+# A pattern also applies where a ticket is optional: if one is given it must fit. The backend defaults: TICKET_REQUIRED, TICKET_PATTERN.
+- name: Show the ticket
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Report
+      ansible.builtin.debug:
+        msg: "running under a valid ticket; note = {{ note | default('(none)') }}"
