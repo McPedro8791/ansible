@@ -1,0 +1,19 @@
+---
+# name: Timeout and retry demo
+# description: Stops after 90 seconds; is repeated twice when the connection to the target fails
+# timeout: 90s
+# retries: 2
+# param: seconds | label=Seconds to wait | type=number | default=5 | min=0 | max=300 | help=Above 90 the run is stopped by the time limit
+#
+# "# timeout:" ends a run that takes longer (status failed, "timed out"); "# retries:" repeats it after a CONNECTION failure or
+# unreachable hosts - not after a failing task. The backend settings RUN_TIMEOUT, RETRY_ATTEMPTS and RETRY_DELAY are the defaults
+# for playbooks that do not say. Try "Seconds to wait = 120" to see the time limit.
+- name: Wait a while
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Sleep
+      ansible.builtin.command: "sleep {{ seconds }}"
+      changed_when: false
+      check_mode: false

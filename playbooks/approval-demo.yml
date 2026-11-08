@@ -1,0 +1,17 @@
+---
+# name: Approval demo
+# description: A real run waits for the approval of a second person; a dry run starts at once
+# approval: required
+# param: reason | label=Reason | required | help=Why the change is needed (shown to the approver in the run list)
+#
+# Needs a sign-in (AUTH_MODE kubernetes/oidc) for a real second person; without one (AUTH_MODE=none) anybody can approve.
+# The approver needs the right "approve" on this playbook (Kubernetes) or the role "approve" / "approve:approval-demo" (OIDC).
+# See docs/BETRIEBSHANDBUCH.md of https://github.com/McPedro8791/headlamp-ansible-plugin, "Läufe, Freigaben, Änderungskontrolle".
+- name: Pretend to change something important
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Say what is being approved
+      ansible.builtin.debug:
+        msg: "approved and running: {{ reason }}"

@@ -1,0 +1,26 @@
+---
+# name: Dry run demo
+# description: Writes a small config file; run it as a Dry run first to see the diff, then for real
+# param: greeting | label=Greeting | default=hello from ansible-gui | help=Line written to the demo file
+#
+# Switch "Dry run" on (ansible-playbook --check --diff): nothing is changed, "Details" shows the diff of the file.
+# Run it for real and then again: the second run changes nothing (idempotent).
+- name: Write a demo file
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Make sure the directory exists
+      ansible.builtin.file:
+        path: /tmp/ansible-gui-demo
+        state: directory
+        mode: "0755"
+
+    - name: Write the greeting
+      ansible.builtin.copy:
+        dest: /tmp/ansible-gui-demo/greeting.conf
+        content: |
+          # managed by ansible-gui (dry-run-demo)
+          greeting={{ greeting }}
+        mode: "0644"
+      diff: true # also shows the difference in a real run

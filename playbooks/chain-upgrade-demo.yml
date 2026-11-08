@@ -1,0 +1,22 @@
+---
+# name: Chain demo, step 2 (upgrade)
+# description: Runs the backup playbook first, on the same target, in the same run
+# requires: chain-backup-demo
+#
+# "# requires:" runs the named playbooks (file name without .yml) BEFORE this one, one after the other, with their default values.
+# The run stops at the first failing step; the recap numbers of all steps are added up. Only one level deep.
+- name: Upgrade
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Check that the backup step ran
+      ansible.builtin.stat:
+        path: /tmp/ansible-gui-demo-backup
+      register: backup
+
+    - name: Refuse to go on without a backup
+      ansible.builtin.assert:
+        that: backup.stat.exists
+        fail_msg: the backup step did not run
+      check_mode: false

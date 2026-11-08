@@ -1,0 +1,15 @@
+---
+# name: Chain demo, step 1 (backup)
+# description: Runs before "Chain demo, step 2" - or on its own
+- name: Take a backup
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Pretend to back up
+      ansible.builtin.file:
+        path: /tmp/ansible-gui-demo-backup
+        state: touch
+        mode: "0644"
+        modification_time: preserve
+        access_time: preserve

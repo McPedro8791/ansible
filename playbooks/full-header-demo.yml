@@ -1,0 +1,28 @@
+---
+# name: Full header demo
+# description: Every line the header of a playbook understands, in one place
+# approval: required
+# timeout: 30m
+# retries: 1
+# precheck: test -d /tmp
+# requires: chain-backup-demo
+# param: stage | label=Stage | type=select | options=dev,staging,prod | default=dev | required
+# param: count | label=Count | type=number | default=3 | min=1 | max=10
+# param: note | label=Note | pattern=^[A-Za-z0-9 ._-]{0,60}$ | help=Letters, digits, space and ._-
+# param: dry | label=Print only | type=boolean | default=true
+# param: token | label=Token | type=secret | help=Typed in, never stored
+#
+# See docs/PLAYBOOK-HANDBUCH.md of https://github.com/McPedro8791/headlamp-ansible-plugin for the meaning of every line. This one needs an approval for a real run, is stopped after 30 minutes,
+# is repeated once after a connection failure, checks /tmp first, runs "Chain demo, step 1" before itself and asks for five values.
+- name: Everything at once
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Show the values (the secret only as a length)
+      ansible.builtin.debug:
+        msg:
+          - "stage = {{ stage }}, count = {{ count }}, dry = {{ dry }}"
+          - "note  = {{ note | default('(none)') }}"
+          - "token = {{ (token | default('')) | length }} characters"
+      no_log: true

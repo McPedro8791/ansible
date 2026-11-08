@@ -1,0 +1,17 @@
+---
+# name: Precheck demo
+# description: Starts only if the checks below succeed on the target
+# precheck: test -d /tmp
+# precheck: test $(df --output=avail -BM /tmp | tail -1 | tr -dc 0-9) -ge 50
+# precheck: command -v ansible-playbook >/dev/null
+#
+# Each "# precheck:" is a command run on the TARGET (in remote_dir) before the playbook; exit code 0 = fine, anything else = the run does not
+# start (status failed, log: "(precheck failed: ...)"). The checks only READ. Change the second one to "-ge 99999999" to see a failing precheck.
+- name: Runs only after the prechecks
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Report
+      ansible.builtin.debug:
+        msg: all prechecks passed
