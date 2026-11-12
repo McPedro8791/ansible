@@ -1,0 +1,28 @@
+---
+# name: Tags of the content repository
+# description: Choose a tag or branch of this Ansible repository (McPedro8791/ansible); the lists are read live with git ls-remote
+# param: content_tag | label=Tag | type=gitrefs | repo=https://github.com/McPedro8791/ansible.git | refs=tags | sort=version | cache=2m | required | help=The tags of the content repository, newest first
+# param: content_branch | label=Branch | type=gitrefs | repo=https://github.com/McPedro8791/ansible.git | refs=branches | default=main | help=The branches of the content repository
+# param: source_url | type=hidden | value=https://github.com/McPedro8791/ansible/tree/${content_tag} | label=Source
+# param: requested_by | type=hidden | value=${user} | label=Requested by
+#
+# Example for type=gitrefs: the backend lists the tags/branches of the
+# repository with `git ls-remote` (no clone) when the form asks, and checks the
+# chosen value again when the run starts. The repository is public, so no
+# credentials are needed. For a private repository add a read-only token in a
+# Secret and name it with auth=, e.g.
+#   kubectl -n headlamp create secret generic github-readonly --from-literal=token=<token>
+#   ... | auth=secret:headlamp/github-readonly/token | auth_user=x-access-token
+# (the backend's service account needs `get` on that Secret; the token never
+# reaches the browser). The hidden parameters are filled in by the backend.
+- name: Show the chosen ref of the content repository
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Chosen tag and branch
+      ansible.builtin.debug:
+        msg:
+          - "tag:          {{ content_tag }}"
+          - "branch:       {{ content_branch | default('(none)') }}"
+          - "source:       {{ source_url }}"
+          - "requested by: {{ requested_by | default('(unknown)') }}"
